@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>RoyalRoad Reader</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 2rem;
+        line-height: 1.6;
+      }
+      .word {
+        cursor: pointer;
+      }
+      #tooltip {
+        position: absolute;
+        background: #f9f9f9;
+        border: 1px solid #ccc;
+        padding: 0.5rem;
+        display: none;
+        z-index: 100;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mother of Learning - Chapter 1</h1>
+    <div id="content">Loading...</div>
+    <div id="tooltip"></div>
+
+    <script>
+      const contentDiv = document.getElementById("content");
+      const tooltip = document.getElementById("tooltip");
+
+      fetch("http://localhost:3000/chapter")
+        .then((res) => res.json())
+        .then((data) => {
+          const rawHTML = data.content;
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = rawHTML;
+          const text = tempDiv.innerText;
+
+          contentDiv.innerHTML = "";
+          text.split(" ").forEach((word) => {
+            const span = document.createElement("span");
+            span.className = "word";
+            span.textContent = word + " ";
+            span.onclick = (e) =>
+              showTooltip(word.replace(/[.,!?]/g, ""), e.pageX, e.pageY);
+            span.onmouseleave = () => (tooltip.style.display = "none");
+            contentDiv.appendChild(span);
+          });
+        });
+
+      function showTooltip(word, x, y) {
+        tooltip.style.left = x + "px";
+        tooltip.style.top = y + "px";
+        tooltip.style.display = "block";
+        tooltip.textContent = `Looking up "${word}"...`;
+
+        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+          .then((res) => res.json())
+          .then((data) => {
+            tooltip.textContent =
+              data[0]?.meanings[0]?.definitions[0]?.definition ||
+              "No definition found.";
+          })
+          .catch(() => {
+            tooltip.textContent = "Translation failed.";
+          });
+      }
+    </script>
+  </body>
+</html>
