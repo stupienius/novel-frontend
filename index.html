@@ -31,7 +31,7 @@
       const contentDiv = document.getElementById("content");
       const tooltip = document.getElementById("tooltip");
 
-      fetch("http://localhost:3000/chapter")
+      fetch("https://novel-backend-vdwo.onrender.com/chapter")
         .then((res) => res.json())
         .then((data) => {
           const rawHTML = data.content;
